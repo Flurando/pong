@@ -1,0 +1,19 @@
+#+TITLE: README FILE FOR PONG
+#+AUTHOR: FLURANDO
+
+* PROJECT DESCRIPTION
+
+* INSTALL & SETUP
+you need guile chickadee to run this little game
+I recommend using guix to have an easy go
+just install guix according to the formal website or get one from your package manager and run `guix pull`, followed by some setup according to the hints printed by guix in the terminal
+After guix is there, execute `guix install guile guile-chickadee` or `guix shell guile guile-chickadee`
+to launch the game, use `guile game.scm` or `./game.scm` if you gave it right to be executed like a script
+
+* HOW TO PLAY
+Use left and right arrow key to move the board at the bottom
+Use a and d key to move the board at the top
+
+* HACKING
+I would continually change the script and you are welcomed to modify it any how you like, as long as you do it the foss way.
+My recommended set up is of course emacs+geiser!
