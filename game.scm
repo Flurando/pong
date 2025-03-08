@@ -24,6 +24,7 @@
 (define *window-keyboard-focused?* #f)
 
 (define *bomb-audio* #f)
+(define *background-music* #f)
 
 (define *board-width* 60)
 (define *board-height* 5)
@@ -60,6 +61,8 @@
 (define (load)
   (set! *window* (current-window))
   (set! *bomb-audio* (load-audio "8bit_bomb_explosion.wav"))
+  (set! *background-music* (make-source #:audio (load-audio "retroindiejosh_down-the-river-we-go.ogg" #:mode 'stream) #:loop? #t #:volume 0.2))
+  (source-play *background-music*)
   (set! *ball* (make-ball))
   (set! *board* (make-board))
   (set! *board-2* (make-board

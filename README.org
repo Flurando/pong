@@ -23,3 +23,8 @@ Use a and d key to move the board at the top
 I would continually change the script and you are welcomed to modify it any how you like, as long as you do it the foss way.
 
 My recommended set up is of course =emacs= + =geiser=!
+
+* CITATION
+1. the bomb music is from a random website which says not royalty music
+2. the background music citation
+   =Contains music ©2023 Retro Indie Josh (https://retroindiejosh.itch.io) Licensed under Creative Commons Attribution 4.0 International=
