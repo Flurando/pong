@@ -2,6 +2,12 @@
 #+AUTHOR: FLURANDO
 
 * PROJECT DESCRIPTION
+* IMPORTANT NOTES
+only the game.scm file is liscenced as I like
+
+the assets now are liscenced separately because that is other people's work
+
+see citation for detail
 
 * INSTALL & SETUP
 you need guile chickadee to run this little game
