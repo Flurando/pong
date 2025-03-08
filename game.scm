@@ -1,11 +1,6 @@
 #!/usr/bin/env guile
 !#
 
-;;; this is a small single-script templete for writing game in chickadee
-;;; feel free to copy it
-;;; Usage: just excute this file with guile, then M-x connect-to-guile or M-x geiser-connect with the default host and port (just Ret Ret). After which you can C-x C-f this file and start editing!
-
-;; import some needed modules
 (use-modules
  ;; repl server
  (system repl coop-server)
@@ -24,16 +19,11 @@
  (chickadee scripting))
 
 ;;; global config
-;; note: Only effective when starting up, changing them would not affect the already running instance.
-(define *window-title* "pong")
-(define *window-width* 480)
-(define *window-height* 640)
-(define *window-fullscreen?* #f)
-(define *window-resizable?* #t)
-(define *update-hz* 30)
-(define *clear-color* black)
+(define *window* #f) ; the variable used to hold the current window object when needed
 
 (define *window-keyboard-focused?* #f)
+
+(define *bomb-audio* #f)
 
 (define *board-width* 60)
 (define *board-height* 5)
@@ -68,34 +58,43 @@
 ;;; real main procedures
 
 (define (load)
-  (if #f #f))
+  (set! *window* (current-window))
+  (set! *bomb-audio* (load-audio "8bit_bomb_explosion.wav"))
+  (set! *ball* (make-ball))
+  (set! *board* (make-board))
+  (set! *board-2* (make-board
+		   #:position (vec2 (vec2-x (*board* #:get 'position))
+				    (abs (- (window-height *window*) (*board* #:get 'height) (vec2-y (*board* #:get 'position)))))
+		   #:width (+ (*board* #:get 'width))
+		   #:height (+ (*board* #:get 'height))
+		   #:velocity (vec2-copy (*board* #:get 'velocity)))))
 
 (define (draw alpha)
   ;; draw background
   (draw-canvas
    (make-canvas
     (with-style ((fill-color black))
-		(fill (rectangle (vec2 0 0) *window-width* *window-height*)))))
+		(fill (rectangle (vec2 0 0) (window-width *window*) (window-height *window*))))))
   ;; draw a center line
   (draw-canvas
    (make-canvas
     (with-style ((stroke-color green)
 		 (stroke-width 4.0))
-		(stroke (line (vec2 0 (/ *window-height* 2))
-			      (vec2 *window-width* (/ *window-height* 2)))))))
+		(stroke (line (vec2 0 (/ (window-height *window*) 2))
+			      (vec2 (window-width *window*) (/ (window-height *window*) 2)))))))
   ;; draw a word
   (draw-text "PONG"
-	     (vec2 (- (/ *window-width* 2) 45)
-		   (- (/ *window-height* 2) 10))
+	     (vec2 (- (/ (window-width *window*) 2) 45)
+		   (- (/ (window-height *window*) 2) 10))
 	     #:scale (vec2 3.0 3.0))
   ;; draw two sides' scores
   (draw-text (number->string (inexact->exact (score *player-1-score*)))
 	     (vec2 0
-		   (- (/ *window-height* 2) 40))
+		   (- (/ (window-height *window*) 2) 40))
 	     #:scale (vec2 3.0 3.0))
   (draw-text (number->string (inexact->exact (score *player-2-score*)))
 	     (vec2 0
-		   (+ (/ *window-height* 2) 5))
+		   (+ (/ (window-height *window*) 2) 5))
 	     #:scale (vec2 3.0 3.0))
   ;; draw ball and board
   (draw-ball *ball*)
@@ -130,11 +129,7 @@
     (set! *window-keyboard-focused?* #f)))
 
 (define (window-resize width height)
-  (unless (= width *window-width*)
-    (set! *window-width* width))
-  (unless (= height *window-height*)
-    (set-vec2-y! (*board-2* #:get 'position) (abs (- *window-height* (*board* #:get 'height) (vec2-y (*board* #:get 'position))))) ; this is a convenient but bad fix when the window is resized. if complexity arose in the future, I would no longer support window resizing to keep the script simple.
-    (set! *window-height* height)))
+  (set-vec2-y! (*board-2* #:get 'position) (abs (- (window-height *window*) (*board* #:get 'height) (vec2-y (*board* #:get 'position))))))
 
 ;;; enter your code here
 
@@ -142,7 +137,7 @@
 (define* (make-ball
 	  #:key
 	  [radius *ball-radius*]
-	  [position (vec2 (/ *window-width* 2) 130.0)]
+	  [position (vec2 (/ (window-width *window*) 2) 130.0)]
 	  [velocity (vec2 0.0 0.0)]
 	  [gravity (vec2 0.0 (- *ball-gravity-y*))]
 	  [acceleration *ball-acceleration*])
@@ -169,7 +164,7 @@
 ;; board generator
 (define* (make-board
 	  #:key
-	  [position (vec2 (- (/ *window-width* 2) (/ *board-width* 2)) *board-distance-from-bottom*)]
+	  [position (vec2 (- (/ (window-width *window*) 2) (/ *board-width* 2)) *board-distance-from-bottom*)]
 	  [width *board-width*]
 	  [height *board-height*]
 	  [velocity (vec2 0.0 0.0)]
@@ -233,7 +228,7 @@
       ;; use velocity to modify position
       (vec2-add! p accelerated-and-gravitied-v))
     ;; update gravity when ball passes the middle horizonal line
-    (if (<= (vec2-y p) (/ *window-height* 2))
+    (if (<= (vec2-y p) (/ (window-height *window*) 2))
 	(set-vec2-y! g (- (abs (vec2-y g))))
 	(set-vec2-y! g (abs (vec2-y g))))))
 
@@ -243,16 +238,16 @@
   (let ((p (board #:get 'position))
 	(v (board #:get 'velocity))
 	(acc 0.1)) ; this is the acceleration of the board when direction keys are pressed
-      ;; assign new-v to board velocity and update position
-      (set-vec2-x! v (+ (* acc
-			   (+ (if (key-pressed? key-left)
-				  (if (negative? (vec2-x v)) (- *board-speed-up*) (- *board-slow-down*))
-				  0)
-			      (if (key-pressed? key-right)
-				  (if (positive? (vec2-x v)) *board-speed-up* *board-slow-down*)
-				  0)))
-			(vec2-x v)))
-      (vec2-add! p v)))
+    ;; assign new-v to board velocity and update position
+    (set-vec2-x! v (+ (* acc
+			 (+ (if (key-pressed? key-left)
+				(if (negative? (vec2-x v)) (- *board-speed-up*) (- *board-slow-down*))
+				0)
+			    (if (key-pressed? key-right)
+				(if (positive? (vec2-x v)) *board-speed-up* *board-slow-down*)
+				0)))
+		      (vec2-x v)))
+    (vec2-add! p v)))
 
 ;;; collision detect and velocity change in update procedure
 ;; intended to be implemented as many procedures, one small task for each.
@@ -264,7 +259,7 @@
     (cond
      [(<= (vec2-x p) 0)
       (set-vec2-x! v (abs (vec2-x v)))]
-     [(>= (vec2-x p) (- *window-width* *board-width*))
+     [(>= (vec2-x p) (- (window-width *window*) *board-width*))
       (set-vec2-x! v (- (abs (vec2-x v))))])))
 
 (define (restrict-ball ball)
@@ -274,18 +269,18 @@
     (cond
      [(<= (vec2-x p) (ball #:get 'radius))
       (set-vec2-x! v (abs (vec2-x v)))]
-     [(>= (vec2-x p) (- *window-width* (ball #:get 'radius)))
+     [(>= (vec2-x p) (- (window-width *window*) (ball #:get 'radius)))
       (set-vec2-x! v (- (abs (vec2-x v))))])
     (cond
      [(<= (vec2-y p) (ball #:get 'radius))
       (set-vec2-y! v (abs (vec2-y v)))]
-     [(>= (vec2-y p) (- *window-height* (ball #:get 'radius)))
+     [(>= (vec2-y p) (- (window-height *window*) (ball #:get 'radius)))
       (set-vec2-y! v (- (abs (vec2-y v))))])
 
     ;; swap the x and y speed when bouncing against the left and right wall
     (when (and *ball-bounce-on-left-right-wall-velocity-xy-swap-enable?*
 	       (or (<= (vec2-x p) (ball #:get 'radius))
-		   (>= (vec2-x p) (- *window-width* (ball #:get 'radius)))))
+		   (>= (vec2-x p) (- (window-width *window*) (ball #:get 'radius)))))
       (set! *ball-bounce-on-left-right-wall-velocity-xy-swap-enable?* #f)
       (let ((v-x (abs (vec2-x v)))
 	    (v-y (abs (vec2-y v))))
@@ -319,7 +314,7 @@
 	(board #:ball&board-collide-enable? 0)
 	(set-vec2! ball-v
 		   (+ (vec2-x ball-v) (vec2-x board-v))
-		   (if (<= (vec2-y ball-p) (/ *window-height* 2)) ; this is actually fair since when rect intersects, it's impossible for the ball to be in the middle
+		   (if (<= (vec2-y ball-p) (/ (window-height *window*) 2)) ; this is actually fair since when rect intersects, it's impossible for the ball to be in the middle
 		       (abs (vec2-y ball-v))
 		       (- (abs (vec2-y ball-v)))))
 	(after *ball&board-collide-delay*
@@ -343,32 +338,31 @@
 	(r (ball #:get 'radius)))
     (cond
      [(<= (vec2-y p) r)
-      (score+1 *player-2-score*)]
-     [(>= (vec2-y p) (- *window-height* r))
-      (score+1 *player-1-score*)])))
+      (begin
+	(audio-play *bomb-audio*) ; yes, we also play a sound here
+	(score+1 *player-2-score*))]
+     [(>= (vec2-y p) (- (window-height *window*) r))
+      (begin
+	  (audio-play *bomb-audio*)
+	  (score+1 *player-1-score*))])))
 
-;;; initialize stuff in game
+;;; stuff in game
 
-(define *ball* (make-ball))
-(define *board* (make-board))
-(define *board-2* (make-board
-		   #:position (vec2 (vec2-x (*board* #:get 'position))
-				    (abs (- *window-height* (*board* #:get 'height) (vec2-y (*board* #:get 'position)))))
-		   #:width (+ (*board* #:get 'width))
-		   #:height (+ (*board* #:get 'height))
-		   #:velocity (vec2-copy (*board* #:get 'velocity))))
+(define *ball* #f)
+(define *board* #f)
+(define *board-2* #f)
 
 ;; run game at last
-(run-game #:window-title *window-title*
-	  #:window-width *window-width*
-	  #:window-height *window-height*
-	  #:window-fullscreen? *window-fullscreen?*
-	  #:window-resizable? *window-resizable?*
+(run-game #:window-title "pong"
+	  #:window-width 480
+	  #:window-height 640
+	  #:window-fullscreen? #f
+	  #:window-resizable? #t
 	  #:window-keyboard-enter window-keyboard-enter
 	  #:window-keyboard-leave window-keyboard-leave
 	  #:window-resize window-resize
-	  #:update-hz *update-hz*
-	  #:clear-color *clear-color*
+	  #:update-hz 30
+	  #:clear-color black
 	  #:load load
 	  #:update update-wrap
 	  #:draw draw-wrap)
