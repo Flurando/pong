@@ -2,6 +2,30 @@
 #+AUTHOR: FLURANDO
 
 * PROJECT DESCRIPTION
+this little pong implementation in guile using chickadee library
+
+is just a personal learning project to get more comfortable on guile coding
+
+it works more like a template than a game
+
+because to my own experience
+
+the ~chickadee play --repl-server~ and ~chickadee play -repl~ do not work as well as using the mannual way
+
+which is also documented on David Tompson's project page
+
+I have freqently faced the situation of setting some list or data and the game crashed at once
+
+so now I would prefer to use this as a starting point
+
+you are welcomed to use this too
+
+note that though the game.scm file is liscenced as AGPL for fun
+
+you don't need to obey as long as you delete the pong lines
+
+the stuff left over is barely the same with DT's document!
+
 * IMPORTANT NOTES
 only the game.scm file is liscenced as I like
 
@@ -25,10 +49,18 @@ Use left and right arrow key to move the board at the bottom
 
 Use a and d key to move the board at the top
 
+by the way, when the game window loses the keyboard focus, it would go blank
+
+awesome to be played at CS lessons and work
+
 * HACKING
 I would continually change the script and you are welcomed to modify it any how you like, as long as you do it the foss way.
 
 My recommended set up is of course =emacs= + =geiser=!
+
+just start the game and use geiser-connect to connect to it
+
+then just Control-x Control-e or Control-c Control-r to load modified codes or newly written features
 
 * CITATION
 1. the bomb music is from a random website which says not royalty music
