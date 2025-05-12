@@ -29,6 +29,8 @@
 
 (define *background-picture* #f)
 
+(define *board-1-picture* #f)
+(define *board-2-picture* #f)
 (define *board-width* 60)
 (define *board-height* 5)
 (define *board-distance-from-bottom* 5)
@@ -70,8 +72,12 @@
   (set! *background-picture* (load-image "background.png"))
   (set! *ball-picture* (load-image "ball.png"))
   (set! *ball* (make-ball))
-  (set! *board* (make-board))
+  (let ((board-picture-atlas (split-texture (load-image "board.png") 60 5)))
+    (set! *board-2-picture* (texture-atlas-ref board-picture-atlas 0))
+    (set! *board-1-picture* (texture-atlas-ref board-picture-atlas 1)))
+  (set! *board* (make-board #:texture *board-1-picture*))
   (set! *board-2* (make-board
+		   #:texture *board-2-picture*
 		   #:position (vec2 (vec2-x (*board* #:get 'position))
 				    (abs (- (window-height *window*) (*board* #:get 'height) (vec2-y (*board* #:get 'position)))))
 		   #:width (+ (*board* #:get 'width))
@@ -155,12 +161,14 @@
 ;; board generator
 (define* (make-board
 	  #:key
+	  [texture #f]
 	  [position (vec2 (- (/ (window-width *window*) 2) (/ *board-width* 2)) *board-distance-from-bottom*)]
 	  [width *board-width*]
 	  [height *board-height*]
 	  [velocity (vec2 0.0 0.0)]
 	  [ball&board-collide-enable? #t])
-  (let ([p position]
+  (let ([t texture]
+	[p position]
 	[w width]
 	[h height]
 	[v velocity]
@@ -172,12 +180,14 @@
 	[(0) (set! b #f)])
       ;; retrieve values
       (case get
+	[(texture) t]
 	[(position) p]
  	[(width) w]
 	[(height) h]
 	[(velocity) v]
 	[(ball&board-collide-enable?) b]
-	[else `((position . ,p)
+	[else `((texture . ,t)
+		(position . ,p)
 		(width . ,w)
 		(height . ,h)
 		(velocity . ,v)
@@ -189,10 +199,7 @@
   (draw-sprite *ball-picture* (vec2- (ball #:get 'position) (vec2 (ball #:get 'radius) (ball #:get 'radius)))))
 
 (define (draw-board board)
-  (draw-canvas
-   (make-canvas
-    (with-style ((fill-color (if (board #:get 'ball&board-collide-enable?) white red)))
-		(fill (rectangle (board #:get 'position) (board #:get 'width) (board #:get 'height)))))))
+  (draw-sprite (board #:get 'texture) (board #:get 'position)))
 
 ;;; update procedures for the ball and board respectively
 ;; note: collisions (and the related velocity changes) are handled seperately
