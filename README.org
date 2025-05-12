@@ -66,3 +66,7 @@ then just Control-x Control-e or Control-c Control-r to load modified codes or n
 1. the bomb music is from a random website which says not royalty music
 2. the background music citation
    =Contains music ©2023 Retro Indie Josh (https://retroindiejosh.itch.io) Licensed under Creative Commons Attribution 4.0 International=
+3. the ball texture and the background are my own drawing, personally I don't mind reusage as long as there is no commercial use. But I would not liscence them as free now because I am not quite familiar to that.
+   Which means, they are simply not liscenced now.
+   However, they are actually not drawed technically since I just use Inkscape to assemble some basic shapes
+   (well, that's why I am not sure whether I should or could liscence them!)
