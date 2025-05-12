@@ -79,18 +79,6 @@
 (define (draw alpha)
   ;; draw background
   (draw-sprite *background-picture* (vec2 0 0))
-  ;; draw a center line
-  (draw-canvas
-   (make-canvas
-    (with-style ((stroke-color green)
-		 (stroke-width 4.0))
-		(stroke (line (vec2 0 (/ (window-height *window*) 2))
-			      (vec2 (window-width *window*) (/ (window-height *window*) 2)))))))
-  ;; draw a word
-  (draw-text "PONG"
-	     (vec2 (- (/ (window-width *window*) 2) 45)
-		   (- (/ (window-height *window*) 2) 10))
-	     #:scale (vec2 3.0 3.0))
   ;; draw two sides' scores
   (draw-text (number->string (inexact->exact (score *player-1-score*)))
 	     (vec2 0
