@@ -12,6 +12,7 @@
  (chickadee graphics text)
  (chickadee graphics color)
  (chickadee graphics texture)
+ (chickadee graphics sprite)
  (chickadee math)
  (chickadee math matrix)
  (chickadee math rect)
@@ -25,6 +26,8 @@
 
 (define *bomb-audio* #f)
 (define *background-music* #f)
+
+(define *background-picture* #f)
 
 (define *board-width* 60)
 (define *board-height* 5)
@@ -63,6 +66,7 @@
   (set! *bomb-audio* (load-audio "8bit_bomb_explosion.wav"))
   (set! *background-music* (make-source #:audio (load-audio "retroindiejosh_down-the-river-we-go.ogg" #:mode 'stream) #:loop? #t #:volume 0.2))
   (source-play *background-music*)
+  (set! *background-picture* (load-image "background.png"))
   (set! *ball* (make-ball))
   (set! *board* (make-board))
   (set! *board-2* (make-board
@@ -74,10 +78,7 @@
 
 (define (draw alpha)
   ;; draw background
-  (draw-canvas
-   (make-canvas
-    (with-style ((fill-color black))
-		(fill (rectangle (vec2 0 0) (window-width *window*) (window-height *window*))))))
+  (draw-sprite *background-picture* (vec2 0 0))
   ;; draw a center line
   (draw-canvas
    (make-canvas
