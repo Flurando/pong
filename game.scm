@@ -35,6 +35,7 @@
 (define *board-speed-up* 3) ; the ability of speeding up the board when pressing direction keys, the higher the faster
 (define *board-slow-down* 5) ; the ability of braking the board when pressing direction keys, the higher the quicker you can stop or change direction
 
+(define *ball-picture* #f)
 (define *ball-radius* 10)
 (define *ball-gravity-y* 0.05) ; the commonly thought gravity, vertically downwards
 (define *ball-acceleration* 0.001) ; think of this as the inner engine of the ball, speeding it up in determined pace. well, you can set it to 0 or 0.0 if you don't like this feature and even a negative one if you wish for something like friction
@@ -67,6 +68,7 @@
   (set! *background-music* (make-source #:audio (load-audio "retroindiejosh_down-the-river-we-go.ogg" #:mode 'stream) #:loop? #t #:volume 0.2))
   (source-play *background-music*)
   (set! *background-picture* (load-image "background.png"))
+  (set! *ball-picture* (load-image "ball.png"))
   (set! *ball* (make-ball))
   (set! *board* (make-board))
   (set! *board-2* (make-board
@@ -171,7 +173,7 @@
       ;; retrieve values
       (case get
 	[(position) p]
-	[(width) w]
+ 	[(width) w]
 	[(height) h]
 	[(velocity) v]
 	[(ball&board-collide-enable?) b]
@@ -184,10 +186,7 @@
 ;;; draw procedures for ball, brick and board respectively
 
 (define (draw-ball ball)
-  (draw-canvas
-   (make-canvas
-    (with-style ((fill-color red))
-		(fill (circle (ball #:get 'position) (ball #:get 'radius)))))))
+  (draw-sprite *ball-picture* (vec2- (ball #:get 'position) (vec2 (ball #:get 'radius) (ball #:get 'radius)))))
 
 (define (draw-board board)
   (draw-canvas
