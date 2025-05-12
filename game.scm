@@ -132,9 +132,6 @@
   (when *window-keyboard-focused?*
     (set! *window-keyboard-focused?* #f)))
 
-(define (window-resize width height)
-  (set-vec2-y! (*board-2* #:get 'position) (abs (- (window-height *window*) (*board* #:get 'height) (vec2-y (*board* #:get 'position))))))
-
 ;;; enter your code here
 
 ;; ball generator
@@ -361,10 +358,9 @@
 	  #:window-width 480
 	  #:window-height 640
 	  #:window-fullscreen? #f
-	  #:window-resizable? #t
+	  #:window-resizable? #f
 	  #:window-keyboard-enter window-keyboard-enter
 	  #:window-keyboard-leave window-keyboard-leave
-	  #:window-resize window-resize
 	  #:update-hz 30
 	  #:clear-color black
 	  #:load load
