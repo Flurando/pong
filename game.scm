@@ -73,8 +73,8 @@
   (set! *ball-picture* (load-image "ball.png"))
   (set! *ball* (make-ball))
   (let ((board-picture-atlas (split-texture (load-image "board.png") 60 5)))
-    (set! *board-2-picture* (texture-atlas-ref board-picture-atlas 0))
-    (set! *board-1-picture* (texture-atlas-ref board-picture-atlas 1)))
+    (set! *board-2-picture* (texture-atlas-ref board-picture-atlas 1))
+    (set! *board-1-picture* (texture-atlas-ref board-picture-atlas 0)))
   (set! *board* (make-board #:texture *board-1-picture*))
   (set! *board-2* (make-board
 		   #:texture *board-2-picture*
@@ -117,8 +117,8 @@
   
   ;; update ball and board
   (update-ball *ball*)
-  (update-board *board* 'left 'right)
-  (update-board *board-2* 'a 'd))
+  (update-board *board* (lambda () (key-pressed? 'left)) (lambda () (key-pressed? 'right)))
+  (update-board *board-2* (lambda () (key-pressed? 'a)) (lambda () (key-pressed? 'd))))
 
 (define (window-keyboard-enter)
   (unless *window-keyboard-focused?*
@@ -227,7 +227,7 @@
 	(set-vec2-y! g (- (abs (vec2-y g))))
 	(set-vec2-y! g (abs (vec2-y g))))))
 
-(define (update-board board key-left key-right)
+(define (update-board board left-proc right-proc)
   ;; listen to keyboard input and set the velocity of the board
   ;; update the board position due to velocity
   (let ((p (board #:get 'position))
@@ -235,10 +235,10 @@
 	(acc 0.1)) ; this is the acceleration of the board when direction keys are pressed
     ;; assign new-v to board velocity and update position
     (set-vec2-x! v (+ (* acc
-			 (+ (if (key-pressed? key-left)
+			 (+ (if (left-proc)
 				(if (negative? (vec2-x v)) (- *board-speed-up*) (- *board-slow-down*))
 				0)
-			    (if (key-pressed? key-right)
+			    (if (right-proc)
 				(if (positive? (vec2-x v)) *board-speed-up* *board-slow-down*)
 				0)))
 		      (vec2-x v)))
