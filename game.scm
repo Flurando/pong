@@ -1,4 +1,5 @@
-#!/usr/bin/env guile
+#!/bin/sh \
+guile
 !#
 
 (use-modules
