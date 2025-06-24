@@ -361,3 +361,7 @@ guile
 	  #:load load
 	  #:update update-wrap
 	  #:draw draw-wrap)
+
+;; Local Variables:
+;; mode: scheme
+;; End:
