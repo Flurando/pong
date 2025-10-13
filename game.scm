@@ -1,5 +1,5 @@
-#!/bin/sh \
-guile
+#!/bin/sh
+exec guile --no-auto-compile -s "$0" "$@"
 !#
 
 (use-modules
