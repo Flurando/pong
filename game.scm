@@ -1,24 +1,24 @@
-#!/bin/sh
-exec guile --no-auto-compile -s "$0" "$@"
+#!/usr/bin/env -S guix shell bash-minimal guile-chickadee -- bash
+exec guile --no-auto-compile -L modules/ -e "(game)" -s "$0" "$@"
 !#
 
-(use-modules
- ;; repl server
- (system repl coop-server)
- ;; chickadee
- (chickadee)
- (chickadee audio)
- (chickadee graphics path)
- (chickadee graphics engine)
- (chickadee graphics text)
- (chickadee graphics color)
- (chickadee graphics texture)
- (chickadee graphics sprite)
- (chickadee math)
- (chickadee math matrix)
- (chickadee math rect)
- (chickadee math vector)
- (chickadee scripting))
+(define-module (game)
+  ;; repl server
+  #:use-module (system repl coop-server)
+  ;; chickadee
+  #:use-module (chickadee)
+  #:use-module (chickadee audio)
+  #:use-module (chickadee graphics path)
+  #:use-module (chickadee graphics engine)
+  #:use-module (chickadee graphics text)
+  #:use-module (chickadee graphics color)
+  #:use-module (chickadee graphics texture)
+  #:use-module (chickadee graphics sprite)
+  #:use-module (chickadee math)
+  #:use-module (chickadee math matrix)
+  #:use-module (chickadee math rect)
+  #:use-module (chickadee math vector)
+  #:use-module (chickadee scripting))
 
 ;;; global config
 (define *window* #f) ; the variable used to hold the current window object when needed
@@ -339,8 +339,8 @@ exec guile --no-auto-compile -s "$0" "$@"
 	(score+1 *player-2-score*))]
      [(>= (vec2-y p) (- (window-height *window*) r))
       (begin
-	  (audio-play *bomb-audio*)
-	  (score+1 *player-1-score*))])))
+	(audio-play *bomb-audio*)
+	(score+1 *player-1-score*))])))
 
 ;;; stuff in game
 
@@ -349,18 +349,19 @@ exec guile --no-auto-compile -s "$0" "$@"
 (define *board-2* #f)
 
 ;; run game at last
-(run-game #:window-title "pong"
-	  #:window-width 480
-	  #:window-height 640
-	  #:window-fullscreen? #f
-	  #:window-resizable? #f
-	  #:window-keyboard-enter window-keyboard-enter
-	  #:window-keyboard-leave window-keyboard-leave
-	  #:update-hz 30
-	  #:clear-color black
-	  #:load load
-	  #:update update-wrap
-	  #:draw draw-wrap)
+(define-public (main args)
+  (run-game #:window-title "pong"
+	    #:window-width 480
+	    #:window-height 640
+	    #:window-fullscreen? #f
+	    #:window-resizable? #f
+	    #:window-keyboard-enter window-keyboard-enter
+	    #:window-keyboard-leave window-keyboard-leave
+	    #:update-hz 30
+	    #:clear-color black
+	    #:load load
+	    #:update update-wrap
+	    #:draw draw-wrap))
 
 ;; Local Variables:
 ;; mode: scheme
